@@ -15,7 +15,7 @@ runs:
         [ "$(realpath "$GITHUB_ACTION_PATH")" = "$(realpath "$GITHUB_WORKSPACE")" ] || cp -r "${GITHUB_ACTION_PATH}/." .
       shell: bash
     - name: Install dependencies
-      uses: ./populate-cache
+      uses: $/populate-cache
     - run: npm run build
       shell: bash
     - run: node run.js
