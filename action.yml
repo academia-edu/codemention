@@ -14,8 +14,22 @@ runs:
       run: |
         [ "$(realpath "$GITHUB_ACTION_PATH")" = "$(realpath "$GITHUB_WORKSPACE")" ] || cp -r "${GITHUB_ACTION_PATH}/." .
       shell: bash
+    # Inlined from populate-cache/action.yml (keep in sync) instead of
+    # `uses: ./populate-cache`: lockfile tools such as `gh actions-lock` can't
+    # follow a workspace-local action, so its dependencies would go unpinned.
+    - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+      with:
+        node-version-file: .node-version
+        package-manager-cache: false
+    - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      id: cache-node-modules
+      with:
+        path: node_modules
+        key: codemention-npm-${{ hashFiles('.node-version', 'package-lock.json') }}
     - name: Install dependencies
-      uses: ./populate-cache
+      run: npm ci
+      shell: bash
+      if: steps.cache-node-modules.outputs.cache-hit != 'true'
     - run: npm run build
       shell: bash
     - run: node run.js
